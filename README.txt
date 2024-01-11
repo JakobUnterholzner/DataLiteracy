@@ -4,4 +4,4 @@ dat -> stores the data (Alexeys job)
 src -> stores larger models or function
 exp -> stores the experiments we performed
 doc -> DataLitReport -> stores the tex file
-doc -> DataLitReport -> stores figures
+doc -> fig -> stores figures (PDF) and scripts that create the figures (.py)
