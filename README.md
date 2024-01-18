@@ -12,3 +12,15 @@ doc -> fig -> stores figures (PDF) and scripts that create the figures (.py)
 `surveillance_data.xlsx` conatains data for years 2013, 2016, 2019-2022 on separate sheets
 
 > Population data was aquired in *GENESIS-Online* [database](https://www-genesis.destatis.de/genesis//online?operation=table&code=12411-0010&bypass=true&levelindex=0&levelid=1705062410665#abreadcrumb) of the Federal Statistical Office 
+
+> data for development of number of mobile device users in Germany: https://www.bundesnetzagentur.de/DE/Fachthemen/Telekommunikation/Marktdaten/Mobilfunkteilnehmer/artikel.html
+> 
+
+
+# Hypotheses
+> The trend of correlation between number of mobile device users and surveillance orders continued (compared to the data between 1990 and 2000)
+> Null: there is no correlation between political parties in the different states and the number of surveillance orders
+
+# Results
+>
+>
