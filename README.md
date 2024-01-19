@@ -16,6 +16,12 @@ doc -> fig -> stores figures (PDF) and scripts that create the figures (.py)
 > data for development of number of mobile device users in Germany: https://www.bundesnetzagentur.de/DE/Fachthemen/Telekommunikation/Marktdaten/Mobilfunkteilnehmer/artikel.html
 > 
 
+# Assumptions
+> Judges are appointed by the state governments (simplification, does not live up to legal processes in detail)
+> GBA (Generalbundesanwalt = Federal Prosecutor General) not regarded in analysis, although not insignificant part of surveillance orders can be attributed to him)
+> 
+
+
 
 # Hypotheses
 > The trend of correlation between number of mobile device users and surveillance orders continued (compared to the data between 1990 and 2000)
