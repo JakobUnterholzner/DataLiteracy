@@ -32,4 +32,4 @@ Ineractive data is available via `streamlit` interface
 ```console
 streamlit run ./src/st_page.py
 ```
-![](https://github.com/JakobUnterholzner/DataLiteracy/tree/main/doc/fig/sample_st.gif)
+![sample_st](./doc/fig/sample_st.gif)
