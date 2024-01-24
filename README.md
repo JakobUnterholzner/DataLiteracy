@@ -28,5 +28,8 @@ doc -> fig -> stores figures (PDF) and scripts that create the figures (.py)
 > Null: there is no correlation between political parties in the different states and the number of surveillance orders
 
 # Results
->
->
+Ineractive data is available via `streamlit` interface 
+```console
+streamlit run ./src/st_page.py
+```
+![](https://github.com/JakobUnterholzner/DataLiteracy/tree/main/doc/fig/sample_st.gif)
