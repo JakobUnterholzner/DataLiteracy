@@ -5,7 +5,7 @@
     (requires python 3.10 or higher, streamlit, matplotlib, numpy, tueplots)
 """
 import streamlit as st
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 from tueplots import bundles
 from tueplots.constants.color import rgb
 from scipy.stats import multinomial
@@ -16,8 +16,7 @@ import matplotlib.patheffects as path_effects
 
 import pandas as pd
 import geopandas as gpd
-from shapely.wkt import loads
-
+import geofunctions as gf
 
 plt.rcParams.update(bundles.beamer_moml())
 
@@ -51,49 +50,15 @@ state = state.split(' - ')[0]
 
 # =============================================================================================
 # Computing stuff
-data = pd.read_csv('../dat/tele_and_gov_data.csv')
-
-data_pol = None
-for i in range(16):
-    data_part = data.iloc[:,i*9+1:i*9+10]
-    reg = data_part.columns[0]
-    data_part.columns = list(map(lambda x: x[3:] if '_' in x else 'orders', data_part.columns))
-    data_part['year'] = data.iloc[:,0]
-    data_part['state'] = reg
-    data_pol = pd.concat([data_pol, data_part], axis=0) if data_pol is not None else data_part
-
-
-Data = pd.read_excel('../dat/surveillance_data.xlsx', sheet_name=None)
-
-data_orders = None
-for k in Data.keys():
-    data_y = Data[k]
-    data_y = data_y.groupby('paragraph').sum().T.reset_index()
-    data_y['state'] = data_y['index']
-    data_y['year'] = int(k[:4])
-    data_orders = pd.concat([data_orders, data_y], axis=0) if data_orders is not None else data_y
-
-data_orders.columns = [x if isinstance(x, str) else 'cases_' + str(x) for x in data_orders.columns]
-
-
-population = pd.read_csv('../dat/12411-0010-DLAND_population.csv')
-population = pd.melt(population, id_vars=['state'], value_vars=population.columns[1:])
-population.columns = ['state', 'year', 'population']
-population['year'] = population.year.astype('int64')
-
-data = data_pol.merge(data_orders, on=['state', 'year']).merge(population, on=['state', 'year'])
-
-data[['Reg1', 'Reg2', 'Reg3']] = data[['Reg1', 'Reg2', 'Reg3']].replace(['0', 0], '')
-data['parties'] = (data.Reg1 
-                   + ' ' + data.Reg2
-                   + ' ' + data.Reg3).apply(lambda x: tuple(sorted(x.split())))
+data, Data, population = gf.prepare_datasets(
+    '../dat/tele_and_gov_data.csv',
+    '../dat/surveillance_data.xlsx',
+    '../dat/12411-0010-DLAND_population.csv'
+)
 
 data['case_4_proba'] = (data.cases_4 / data.population * 100).apply(lambda x: round(x,3)).astype(str)
 
-geo_df = pd.read_csv('../dat/ne_10m_admin_1_states_provinces/DE_shapes.csv')
-geo_df['geometry'] = geo_df.geometry.apply(loads)
-geo_df = gpd.GeoDataFrame(geo_df, crs='EPSG:4326')
-geo_df['coords'] = geo_df.geometry.apply(lambda x: x.representative_point().coords[:][0])
+geo_df = gf.load_gdp_data('../dat/ne_10m_admin_1_states_provinces/DE_shapes.csv')
 
 geo_data = geo_df.merge(data, on = 'state')
 geo_data['cases_6'] = geo_data.cases_6.apply(lambda x: 1 if x == 0 else x)
@@ -103,53 +68,13 @@ geo_data['laws_per_order'] = geo_data.cases_6 / geo_data.cases_4
 # =============================================================================================
 # Plotting
 
-def plot_map(geo_df: pd.DataFrame, column: str, title: str = None, figname: str = None) -> None:
-    """
-    Plot german map with colorbar.
-    
-    arguments:
-    geo_df -- data prepared with `data_to_geo`
-    column -- value which is used to indicate levels across states, e.g. 'cases_3_per_1k'
-    title -- plot titile
-    figname -- if provided save figure, e.g. 'map_rel_2021.png'
-    """
-    cmap = 'Blues' # can use other like 'Reds'
-    fig, ax = plt.subplots(1, figsize=(20, 6 ))
-
-    ax = geo_df.plot(column=column, ax=ax, edgecolor='0.8', linewidth=1, cmap=cmap)
-    ax.set_title(title, fontdict={'fontsize': '16', 'fontweight': '3'})
-
-    for idx, row in geo_df.iterrows():
-        x = row['coords'][0] - 0.1
-        y = row['coords'][1]
-        text = plt.annotate(
-            text=f"{row['state']}",
-            xy=(x,y),
-            xytext= (x,y), 
-            fontsize=11,
-            color='black',
-        )
-        text.set_path_effects([path_effects.Stroke(linewidth=1, foreground='white'),
-                           path_effects.Normal()])
-
-    ax.axis('off')
-    
-    vmin, vmax = geo_df[column].min(), geo_df[column].max()
-    sm = plt.cm.ScalarMappable(norm=plt.Normalize(vmin=vmin, vmax=vmax), cmap=cmap)
-    cbaxes = fig.add_axes([0.35, 0.125, 0.01, 0.75])
-    cbar = fig.colorbar(sm, cax=cbaxes)
-    if figname:
-        plt.savefig(figname, dpi=400)
-
-    return fig, ax
-
-
 data_year = geo_data.query(f'year=={year}')
 I_to_col =  {'P(s)': 'case_4_proba', 'LPO': 'laws_per_order'}
 col_to_I = {'case_4_proba': 'P(s), %', 'laws_per_order': 'LPO'}
 column = I_to_col[value]
 pd.options.display.float_format = '{:,.f6}'.format
-fig, ax = plot_map(data_year, column)
+
+fig, ax = gf.plot_map(data_year, column)
 col1, col2 = st.columns(2)
 with col1:
     st.markdown(f'### Indicator level in states: {col_to_I[column]}')
