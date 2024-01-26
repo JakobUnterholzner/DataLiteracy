@@ -37,6 +37,7 @@ st.sidebar.markdown("# Map")
 year = st.sidebar.selectbox("Year", [2021, 2020, 2019, 2016, 2013])
 value = st.sidebar.selectbox("Indicator", ['P(s)', 'LPO'])
 st.sidebar.markdown("* P(s) - probability to be surveilled \n * LPO - mean number of laws applied for each order")
+cmap = st.sidebar.selectbox("Colors", ['Purples', 'Blues', 'Greens', 'Oranges', 'Reds'], index=1)
 
 show_table = st.sidebar.checkbox("Show table", value=False)    
 
@@ -74,7 +75,7 @@ col_to_I = {'case_4_proba': 'P(s), %', 'laws_per_order': 'LPO'}
 column = I_to_col[value]
 pd.options.display.float_format = '{:,.f6}'.format
 
-fig, ax = gf.plot_map(data_year, column)
+fig, ax = gf.plot_map(data_year, column, cmap=cmap)
 col1, col2 = st.columns(2)
 with col1:
     st.markdown(f'### Indicator level in states: {col_to_I[column]}')

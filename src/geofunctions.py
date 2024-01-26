@@ -1,13 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as path_effects
-from typing import Union
 from shapely.wkt import loads
 
-import numpy as np
 import pandas as pd
 import geopandas as gpd
-import scipy.stats as sps
 
 
 def prepare_datasets(
@@ -70,7 +67,8 @@ def plot_map(
         geo_df: pd.DataFrame, 
         column: str, 
         title: str = None, 
-        dst_path: str = None) -> None:
+        dst_path: str = None,
+        cmap: str = 'Blues'):
     """
     Plot german map with colorbar.
     
@@ -79,8 +77,11 @@ def plot_map(
     column -- value which is used to indicate levels across states, e.g. 'cases_3_per_1k'
     title -- plot titile
     dst_path -- if provided save figure, e.g. './map_rel_2021.png'
+    cmap -- colormap for the plot
+
+    returns:
+    fig, ax - tuple of matplotlib Figure and Axes
     """
-    cmap = 'Blues' # can use other like 'Reds'
     fig, ax = plt.subplots(1, figsize=(20, 6 ))
 
     ax = geo_df.plot(column=column, ax=ax, edgecolor='0.8', linewidth=1, cmap=cmap)
