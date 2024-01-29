@@ -2,6 +2,13 @@
 # A study of german telecomunication surveillance
 This repository stores all data and code for a study of german telecomunication surveillance that was conducted as a project in the DataLiteracy Course at the University of Tübingen, Winter Term 2023/24.
 
+# Central Contribution: 
+We want visually explore telecommunication surveillance data to contribute to legal transparancy. You can explore the data in an interactive via `streamlit` interface:
+```console
+streamlit run ./src/st_page.py
+```
+![sample_st](./doc/fig/sample_st.gif)
+
 ##  Data
 > Main data is taken from Bundesjustizamt [Statistiken der Rechtspflege](https://www.bundesjustizamt.de/DE/Service/Justizstatistiken/Justizstatistiken_node.html#AnkerDokument44152) web page.\
 `surveillance_data.xlsx` conatains full data for years 2013, 2016, 2019-2022, and the number of inital on prolonged orders (§4) for 2008-2021 on separate sheets.
