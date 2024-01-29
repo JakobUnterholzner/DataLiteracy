@@ -1,3 +1,8 @@
+'''This scirpt creates a figures (PDF), which is stored in the
+same fig directory.
+@author: Jakob Unterholzner
+'''
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
@@ -5,7 +10,7 @@ import matplotlib.cm as cm
 import numpy as np
 from tueplots import bundles
 from matplotlib.patches import Patch
-from matplotlib.lines import Line2D
+
 
 ###################################################################################################
 #1. Prepare the surveillance data
@@ -27,68 +32,97 @@ surv.set_index('Year', inplace=True)
 
 #We only analyse pargraph 4 as these are the actual surveillance Orders
 surv = surv[surv['paragraph'].isin([4])]
-surv.drop(['description', 'description_en', 'overall','paragraph'], axis=1, inplace=True)
-surv['sum'] = surv.iloc[:, 1:].sum(axis=1, numeric_only=True).round().astype(int)
+surv.drop(['description', 'description_en', 'overall','paragraph', 'GBA'], axis=1, inplace=True)
+surv['mean'] = surv.mean(axis=1, numeric_only=True).round().astype(int)
+
+###################################################################################################
+#2. Prepare the population data
+population = pd.read_csv('dat/12411-0010-DLAND_$F.csv',
+                        sep=';', skiprows=5, skipfooter=4, engine='python')
+population['state'] = ['BW', 'BY', 'BE', 'BB', 'HB', 'HH', 'HE', 'MV', 'NI',\
+                       'NW', 'RP', 'SL', 'SN', 'ST', 'SH', 'TH']
+population.drop(['Unnamed: 0'], axis=1, inplace=True)
+population.columns = population.columns.str.replace('31.12.', '')
+population = pd.melt(population, id_vars=['state'], value_vars=population.columns[1:])
+population.columns = ['state', 'year', 'population']
+population['year'] = population.year.astype('int64')
+
+###################################################################################################
+#3. Combine data
+surv = surv.reset_index().melt(id_vars='Year', var_name='state', value_name='count')
+surv['year'] = pd.to_datetime(surv['Year']).dt.year
+
+# Merge data_yearly_melted and population
+merged_df = pd.merge(surv, population, how='inner', on=['state', 'year'])
 
 # Every second row contain prolonged orders, so we shift the data by one row
-surv['sum4.2'] = surv['sum'].shift(-1)
-surv = surv.iloc[::2]
+merged_df['count4.2'] = merged_df['count'].shift(-1)
+merged_df = merged_df.iloc[::2]
 
-# Create a DataFrame with only the data for Germany for later use
-ger_data = surv[['sum', 'sum4.2']].copy()
-ger_data.index = pd.to_datetime(ger_data.index, format='%Y')
+#Calculate the sum over states for a germnay wide surveillance order number
+# Group the data by year and calculate the sum of counts and population
+ger_data = merged_df.groupby('year').agg({'count': 'sum', 'count4.2': 'sum', 'population': 'sum'}).reset_index()
+ger_data['state'] = 'GER'
+merged_df = pd.concat([merged_df, ger_data], ignore_index=True)
 
-# Shift the dates to the last day of the year for plotting
-ger_data.index = ger_data.index + pd.offsets.YearEnd(1)
-ger_data.sort_index(inplace=True)
+merged_df['count'] = merged_df['count'].astype(int)
+merged_df['count4.2'] = merged_df['count4.2'].astype(int)
+merged_df['count_sum'] = merged_df['count'] + merged_df['count4.2']
 
-##################################################################################################
-# 2. Mobile user data
-mobile_data = pd.read_csv('dat/mobile_user_germany.csv', sep=';', header=0)
+#divide count by population & scale by 100.000
+merged_df['count_norm'] = (merged_df['count'] / merged_df['population'] * 100_000).round(5)
+merged_df['count4.2_norm'] = (merged_df['count4.2'] / merged_df['population'] * 100_000).round(5)
+merged_df['count_sum_norm'] = (merged_df['count_sum'] / merged_df['population'] * 100_000).round(5)
 
-# Select rows where 'Jahr' is between 2008 and 2021 and create a copy
-mobile_data = mobile_data[mobile_data['Jahr'].between(2008, 2021)].copy()
-mobile_data = mobile_data[mobile_data['Quartal'].isin([4])]
-mobile_data['Quartal'] = mobile_data['Quartal'].astype(int) 
-mobile_data['Date'] = pd.to_datetime(mobile_data['Jahr'].astype(str) + '-' + '12' + '-31')
-mobile_data.set_index('Date', inplace=True)
-mobile_data.drop(['Jahr', 'Quartal'], axis=1, inplace=True)
+# Sort the DataFrame to have the states ordered by population
+merged_df.sort_values(by='population', ascending=False, inplace=True)
+states_by_pop = merged_df['state'].unique()
+
+#transform to wide format
+count_sum_norm = merged_df.pivot(index='state', columns='year', values='count_sum_norm')
+
+# Convert the index to a categorical type with the states ordered by 'states_by_pop'
+count_sum_norm.index = pd.Categorical(count_sum_norm.index, categories=states_by_pop, ordered=True)
+count_sum_norm.sort_index(inplace=True)
+count_sum_norm.drop('GER', inplace=True)
 
 
-##################################################################################################
-# 3. Plotting
 
-plt.rcParams.update(bundles.icml2022(column="half", nrows=1, ncols=1, usetex=False))
+
+###################################################################################################
+# 4. Plotting
+plt.rcParams.update(bundles.icml2022(column="full", nrows=1, ncols=1, usetex=False))
 fig, ax = plt.subplots(1,1)
 
-colors = cm.cubehelix_r(np.linspace(0.2, 0.8, 5))
-base = ax.bar(ger_data.index.year, ger_data['sum4.2'],
-              color=colors[3], label='prolonged')
-top = ax.bar(ger_data.index.year, ger_data['sum'],
-             bottom=ger_data['sum4.2'], color=colors[2], label='initial')
+# Create a list of x coordinates for the bars
+x = range(len(count_sum_norm.index))
+bar_width = 0.065
 
-#406d2a
-#b9c3f2
-ax2 = ax.twinx()
-user = ax2.plot(mobile_data.index.year, mobile_data['Gesamt'], linestyle='dashed',
-                 color='black', linewidth=1, label='mobile users')
+# Create a color map
+colors = cm.cubehelix_r(np.linspace(0.2, 0.8, len(count_sum_norm.columns)))
+legend_patches = []
 
+# Create a bar plot for each column
+for i, (year, color) in enumerate(zip(count_sum_norm.columns, colors)):
+    ax.bar([xi*(1+bar_width) + i*bar_width for xi in x], count_sum_norm[year],
+           width=bar_width, label=year, color=color)
+    legend_patches.append(Patch(color=color, label=year))
 
 # Set the labels of the x-axis, y-axis and title
-ax.set_ylabel('Surv. Orders')
-ax2.set_ylabel('User in 100 Mio.')
+ax.set_xlabel('Federal States of Germany (sorted by population)')
+ax.set_ylabel('Surv. Orders per 100.000 Inhabitants')
 
 # Set the x-ticks to be the states and rotate them
-labels = ['' if i % 2 else str(year) for i, year in enumerate(ger_data.index.year)]
-plt.xticks(ger_data.index.year, labels, rotation=0)
+plt.xticks([xi*(1+bar_width) + 0.5*len(count_sum_norm.columns)*bar_width for xi in x], 
+           count_sum_norm.index, rotation=0)
 ax.grid(which="major", axis="y", alpha=0.5)
+# Set the x-axis limits
+ax.set_xlim(x[0]*(1+bar_width) - 0.5*bar_width,
+            x[-1]*(1+bar_width) + (len(count_sum_norm.columns)+0.5)*bar_width)
+ax.set_axisbelow(True)
 
-# ask matplotlib for the plotted objects and their labels
-lines, labels = ax.get_legend_handles_labels()
-lines2, labels2 = ax2.get_legend_handles_labels()
-ax2.legend(lines + lines2, labels + labels2, loc="upper center" ,
-           framealpha=1, facecolor="white", ncol=3)
-ax.set_ylim([0,27500])
-
-plt.savefig('doc/fig/trend_and_user.pdf')
+# Display the legend
+ax.legend(handles=legend_patches, loc="upper left", framealpha=1, facecolor="white", ncol=2)
+plt.savefig('doc/fig/trend.pdf')
 plt.show()
+
