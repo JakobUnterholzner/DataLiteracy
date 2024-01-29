@@ -1,7 +1,7 @@
 # Structure
 
 
-![Trend_States](./doc/fig/trend.pdf)
+[Trend_States](./doc/fig/trend.pdf)
 
 # Data
 > Main data is taken from Bundesjustizamt [Statistiken der Rechtspflege](https://www.bundesjustizamt.de/DE/Service/Justizstatistiken/Justizstatistiken_node.html#AnkerDokument44152) web page.\
@@ -10,7 +10,7 @@
 > data for development of number of mobile device users in Germany: https://www.bundesnetzagentur.de/DE/Fachthemen/Telekommunikation/Marktdaten/Mobilfunkteilnehmer/artikel.html
 > data regarding federal governments is stored in dat/election_results_per_states folder
 > 
-![Trend_user](./doc/fig/trend_and_user.pdf)
+[Trend_user](./doc/fig/trend_and_user.pdf)
 
 # Assumptions
 > Judges are appointed by the state governments (simplification, does not live up to legal processes in detail)
