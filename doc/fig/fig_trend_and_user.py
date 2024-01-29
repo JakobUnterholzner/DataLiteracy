@@ -67,9 +67,9 @@ fig, ax = plt.subplots(1,1)
 
 colors = cm.cubehelix_r(np.linspace(0.2, 0.8, 5))
 base = ax.bar(ger_data.index.year, ger_data['sum4.2'],
-              color=colors[3], label='prolonged')
+              color=colors[1], label='prolonged')
 top = ax.bar(ger_data.index.year, ger_data['sum'],
-             bottom=ger_data['sum4.2'], color=colors[2], label='initial')
+             bottom=ger_data['sum4.2'], color=colors[0], label='initial')
 
 #406d2a
 #b9c3f2
@@ -93,6 +93,9 @@ lines2, labels2 = ax2.get_legend_handles_labels()
 ax2.legend(lines + lines2, labels + labels2, loc="upper center" ,
            framealpha=1, facecolor="white", ncol=3)
 ax.set_ylim([0,27500])
+
+ax.set_axisbelow(True)
+ax2.set_axisbelow(True)
 
 plt.savefig('doc/fig/trend_and_user.pdf')
 plt.show()
