@@ -61,12 +61,14 @@ mobile_data.drop(['Jahr', 'Quartal'], axis=1, inplace=True)
 plt.rcParams.update(bundles.icml2022(column="half", nrows=1, ncols=1, usetex=False))
 fig, ax = plt.subplots(1,1)
 
+colors = cm.cubehelix_r(np.linspace(0.2, 0.8, 5))
 base = ax.bar(ger_data.index.year, ger_data['sum4.2'],
-              color='#406d2a', label='prolonged')
+              color=colors[3], label='prolonged')
 top = ax.bar(ger_data.index.year, ger_data['sum'],
-             bottom=ger_data['sum4.2'], color='#b9c3f2', label='initial')
+             bottom=ger_data['sum4.2'], color=colors[2], label='initial')
 
-
+#406d2a
+#b9c3f2
 ax2 = ax.twinx()
 user = ax2.plot(mobile_data.index.year, mobile_data['Gesamt'], linestyle='dashed',
                  color='black', linewidth=1, label='mobile users')
