@@ -1,5 +1,5 @@
-# Structure
-
+# DataLiteracy Project Report: A study of german telecomunication surveillance
+This repository stores all data and code for a study of german telecomunication surveillance that was conducted as a project in the DataLiteracy Course at the University of Tübingen, Winter Term 2023/24.
 
 ![Trend_States](./doc/fig/trend.png)
 
