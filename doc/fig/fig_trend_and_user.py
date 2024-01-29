@@ -42,6 +42,10 @@ ger_data.index = pd.to_datetime(ger_data.index, format='%Y')
 ger_data.index = ger_data.index + pd.offsets.YearEnd(1)
 ger_data.sort_index(inplace=True)
 
+relation = ger_data['sum4.2'] / (ger_data['sum']+ger_data['sum4.2'])*100
+print(ger_data)
+print(f'The mean percentage of prolonged orders to the total ordes: {relation.mean().round(2)} %')
+
 ##################################################################################################
 # 2. Mobile user data
 mobile_data = pd.read_csv('dat/mobile_user_germany.csv', sep=';', header=0)
@@ -76,7 +80,7 @@ user = ax2.plot(mobile_data.index.year, mobile_data['Gesamt'], linestyle='dashed
 
 # Set the labels of the x-axis, y-axis and title
 ax.set_ylabel('Surv. Orders')
-ax2.set_ylabel('User in 100 Mio.')
+ax2.set_ylabel('Users')
 
 # Set the x-ticks to be the states and rotate them
 labels = ['' if i % 2 else str(year) for i, year in enumerate(ger_data.index.year)]
