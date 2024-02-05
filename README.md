@@ -21,14 +21,16 @@ streamlit run ./src/st_page.py
 ![Trend_user](./doc/fig/trend_and_user.png)
 
 # Assumptions
-1. Judges are appointed by the state governments (simplification, does not live up to legal processes in detail)
-2. Each order for surveillance only targets a solitary individua
+1. Judges are appointed by the state governments (simplification, does not live up to legal processes in detail).
+2. Each order for surveillance only targets a solitary individual.
+
 # Hypotheses tested
 1. Did the trend of dependancy between number of mobile device users and surveillance orders continued (compared to the data between 1990 and 2000)?
-2. Is there a difference in survillance rates between the states where the certain party is introduced in the ruling government (in 2021)? 
-3. Do the survilled crimes distributed differently across states (in 2021)?
+2. Is there a difference in surveillance rates between the states where the certain party is introduced in the ruling government (in 2021)? 
+3. Do the surveilled crimes distributed differently across states (in 2021)?
 
 # Results
-1. **to fill**
-2. All the parties have an effect on the rates between the samples basen on their presense in the government. Linke, Grüne and FW indicate (chould not be confused with the direct influence) higher survillance rates in the states where they rule. SPD, CDU, FDP on the other hand indicate a decrease in probability of being survilles.
-3. Althouth the most survilled crimes remain the same (Narcotics, Fraud, Gang theft, Murder, Robbery). Their distribution is unique across each of the 5 states chosen to the test.
+1. Between 2008 and 2021, the number of surveillance orders first increased up until 2014, but then decreased again to slightly above the level of 2008.
+2. The city-states Hamburg, Bremen, and Berlin as well as Hessen show the highest relative number of surveillance orders.
+3. All the parties have an effect on the rates between the samples basen on their presense in the government. Linke, Grüne and FW indicate (chould not be confused with the direct influence) higher surveillance rates in the states where they rule. SPD, CDU, FDP on the other hand indicate a decrease in probability of being surveilled.
+4. Although the most surveilled crimes remain the same (Narcotics, Fraud, Gang theft, Murder, Robbery), their distribution is unique across each of the 5 states chosen to the test.
